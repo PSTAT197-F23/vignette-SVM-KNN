@@ -1,0 +1,5 @@
+"0","ggplot(heart, aes(x=age_class, fill = output, color = output)) + "
+"0","  geom_bar(position = ""fill"", alpha=0.5) + "
+"0","  theme(legend.position = ""top"") + "
+"0","  labs(title = ""Age vs. Heart Disease"", "
+"0","          x = ""Age"", y = ""Number of People"")"

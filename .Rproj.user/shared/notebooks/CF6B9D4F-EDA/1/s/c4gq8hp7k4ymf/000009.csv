@@ -1,0 +1,6 @@
+"0","ggplot(heart, aes(x=age)) + "
+"0","  geom_bar(position = ""dodge"", alpha=0.5) + "
+"0","  theme(legend.position = ""top"")+ "
+"0","  labs(title = ""Age Distibution"", "
+"0","          x = ""Age"", y = ""Number of People"")"
+"0",""

@@ -1,0 +1,27 @@
+{
+    "id": "29B33E26",
+    "path": "~/Documents/GitHub/vignette-binary-logistic-regression/scripts/EDA.Rmd",
+    "project_path": "scripts/EDA.Rmd",
+    "type": "r_markdown",
+    "hash": "712532740",
+    "contents": "",
+    "dirty": false,
+    "created": 1701743889763.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "3,17",
+        "scrollLine": "0",
+        "last_setup_crc32": "8BD05B8F7946e2d5"
+    },
+    "folds": "129|6|146|0|\n",
+    "lastKnownWriteTime": 1701745205,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1701745205289,
+    "read_only": false,
+    "read_only_alternatives": []
+}

@@ -1,6 +1,6 @@
-# Vignette: K-Nearest Neighbors and Support Vector Machines
+# Vignette: XGBoost and Support Vector Machine
 
-Vignette on fitting K-Nearest Neighbors and Support Vector Machines to heart data; created as a final project for PSTAT197A for Fall 2023.
+Vignette on fitting and Support Vector Machine and XGBoost to heart data; created as a final project for PSTAT197A for Fall 2023.
 
 ### Contributors
 
@@ -8,7 +8,7 @@ Lu Liu, Haoran Yan, Shuai Yuan, Irena Wong, and Molata Fu
 
 ## Abstract
 
-Through this project, we aim to implement support vector machines and K-nearest neighbors in order to predict the likelihood of a patient getting a heart attack. This is a binary classification problem with the outcome categories: less chance of heart attack and more chance of heart attack.
+Through this project, we aim to implement support vector machines and XGBoost in order to predict the likelihood of a patient getting a heart attack. This is a binary classification problem with the outcome categories: less chance of heart attack and more chance of heart attack.
 
 #### Our Data
 
@@ -82,7 +82,8 @@ Our data: https://www.kaggle.com/datasets/rashikrahmanpritom/heart-attack-analys
 - https://www.youtube.com/watch?v=_YPScrckx28
 - https://scikit-learn.org/stable/modules/svm.html
 
-#### Learn about KNN!
-- https://www.youtube.com/watch?v=0p0o5cmgLdE
-- https://www.geeksforgeeks.org/k-nn-classifier-in-r-programming/
+#### Learn about XGBoost!
+- https://www.youtube.com/watch?v=TyvYZ26alZs
+- https://www.analyticsvidhya.com/blog/2016/01/xgboost-algorithm-easy-steps/
+
 

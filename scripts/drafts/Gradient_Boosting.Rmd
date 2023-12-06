@@ -1,0 +1,102 @@
+---
+title: "Gradient Boosting"
+author: "Lu Liu"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+    code_folding: hide
+    toc_depth: 4
+  pdf_document:
+    toc: yes
+    toc_depth: '4'
+---
+
+
+```{r setup, echo=FALSE}
+library(knitr)
+# set global chunk options: images will be 7x5 inches
+knitr::opts_chunk$set(fig.width=7, fig.height=5)
+
+options(digits = 4)
+
+# debug latex
+options(tinytex.verbose = TRUE)
+```
+
+## Library Loading
+
+```{r}
+library(gbm)
+library(rsample)
+library(caret)
+library(dplyr)
+```
+
+
+## Data Loading
+
+```{r}
+setwd("C:/Users/luliu/OneDrive/Desktop/PSTAT197A/Final_Project/vignette-SVM-KNN")
+load("data/heart.rda")
+```
+
+```{r}
+heart$cp <- as.factor(heart$cp)
+heart$fbs <- as.factor(heart$fbs)
+heart$restecg <- as.factor(heart$restecg)
+heart$exng <- as.factor(heart$exng)
+heart$caa <- as.factor(heart$caa)
+
+heart$thall <- as.factor(heart$thall)
+
+heart$output <- as.factor(heart$output)
+heart$sex <- as.factor(heart$sex)
+heart$slp <- as.factor(heart$slp)
+```
+
+
+## Splitting the Data
+
+```{r}
+# splitting the data
+set.seed(3435)
+heart_split <- initial_split(heart, strata = output, prop = 0.8)
+heart_train <- training(heart_split)
+heart_test <- testing(heart_split)
+```
+
+## Training the model
+
+```{r}
+model_gbm = gbm(output ~.,
+              data = heart_train,
+              distribution = "multinomial",
+              cv.folds = 10,
+              shrinkage = .01,
+              n.minobsinnode = 10,
+              n.trees = 1000)
+summary(model_gbm)
+```
+
+
+
+```{r}
+pred_test = predict.gbm(object = model_gbm,
+                   newdata = heart_test,
+                   n.trees = 1000,           # 500 tress to be built
+                   type = "response")
+
+class_names = as.numeric(colnames(pred_test)[apply(pred_test, 1, which.max)])
+
+result = data.frame(heart_test$output, class_names)
+```
+
+
+```{r}
+conf_mat = confusionMatrix(heart_test$output, as.factor(class_names))
+print(conf_mat)
+```
+
+

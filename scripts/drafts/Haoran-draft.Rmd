@@ -107,6 +107,19 @@ results <- rfe(x=dataset2[, c(1:8,10:14)], y=dataset2$output,
 print(predictors(results))
 ```
 
+```{r}
+set.seed(100)
+varimp_data <- data.frame(feature = row.names(varImp(results))[1:9],
+                          importance = varImp(results)[1:9, 1])
+
+ggplot(data = varimp_data, 
+       aes(x = reorder(feature, -importance), y = importance, fill = feature)) +
+  geom_bar(stat="identity") + labs(x = "Features", y = "Variable Importance") + 
+  geom_text(aes(label = round(importance, 2)), vjust=1.6, color="white", size=4) + 
+  theme_bw() + theme(legend.position = "none")
+```
+
+
 # 4. Split the data
 
 ```{r}
@@ -147,7 +160,20 @@ test_pred
 ```
 
 ```{r}
-caret::confusionMatrix(table(test_pred, testing$output))
+cm = caret::confusionMatrix(table(test_pred, testing$output))
+cm
 ```
 
+
+```{r}
+set.seed(100)
+svm_acc <- cm$overall["Accuracy"]
+#plot confusion Matrix 
+testing$pred <- test_pred
+ggplot(testing, aes(output, pred, color = output)) +
+  geom_jitter(width = 0.2, height = 0.1, size=2) +
+  labs(title="Confusion Matrix",
+       y="Predicted",
+       x="Truth")
+```
 

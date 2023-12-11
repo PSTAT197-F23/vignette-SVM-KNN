@@ -31,7 +31,7 @@ options(tinytex.verbose = TRUE)
 
 The research aims to develop accurate and efficient models to aid in early detection and intervention strategies for improved patient outcomes.
 
-The predictive models, **XGBoost** and **Support** Vector Machine (SVM), were selected for their capabilities in handling complex dataset and their potential in accurately identifying heart disease.
+The predictive models, **XGBoost** and **Support Vector Machine (SVM)**, were selected for their capabilities in handling complex dataset and their potential in accurately identifying heart disease.
 
 
 ```{r,message = FALSE, warning = FALSE}
@@ -75,7 +75,9 @@ train_y <- heart_train[,14]
 test_x = data.matrix(heart_test[, -14])
 test_y = heart_test[, 14]
 ```
-Using initial_split() from the rsample package to divide the dataset into training (80%) and testing (20%) sets. This ensures a balanced distribution of classes (stratified by the output variable).
+Using initial_split() from the rsample package to divide the dataset into training (80%) and testing (20%) sets. This ensures a balanced distribution of classes (stratified by the output variable). Partition of the data is performed randomly, so for reproduction purposes, we need to set seed for this process where set.seed() needs to be executed with the splitting code at the same time. 
+
+We also separate the labels and the features to be used in the prediction task in a later stage. 
 
 ***Converting Train and Test into xgb.DMatrix Format:***
 ```{r}
@@ -83,6 +85,7 @@ xgb_train = xgb.DMatrix(data = train_x, label = train_y)
 xgb_test = xgb.DMatrix(data = test_x, label = test_y)
 ```
 
+XGBoost package allows us to group the data into a Dmatrix which can be directly inputted into the training process. 
 
 ***Using Cross-Validation to Find Optimal Number of Iterations:***
 ```{r,message = FALSE, warning = FALSE}
@@ -104,6 +107,9 @@ xgbcv = xgb.cv(params = param_list,
                early_stopping_rounds = 30,
                maximize = F)
 ```
+  
+  The function sgb.cv can take in various parameters, which is explained in the following section. 
+  
   •**booster**: It specifies the type of booster to use. 'gbtree' indicates that the booster is a tree-based model using gradient boosting.
 
   •**objective**:  'binary:logistic' implies the selected type of loss function for binary classification, which minimizes the logistic loss for binary outcomes.
@@ -118,7 +124,7 @@ xgbcv = xgb.cv(params = param_list,
 
   •**colsample_bytree**: This parameter denotes the fraction of features (columns) to be randomly sampled for each tree. A value of 0.5 implies that only 50% of the features will be considered for splitting at each node.
 
-  Using xgb.cv() to perform k-fold cross-validation (nfold = 5) on the training data (xgb_train) to determine the optimal number of boosting rounds (nrounds) while avoiding overfitting. Early stopping is implemented (early_stopping_rounds) to halt training if no improvement occurs.
+  Using xgb.cv() to perform k-fold cross-validation (nfold = 5) on the training data (xgb_train) to determine the optimal number of boosting rounds (nrounds) while avoiding overfitting. Early stopping is implemented (early_stopping_rounds) to halt training if no improvement occurs (when the train loss and test loss does not have significant decrease). 
 
 **The best iteration is 452 in this case.**
 
@@ -134,8 +140,8 @@ blue_palette <- colorRampPalette(c("lightblue", "darkblue"))(length(heart) -1)
 xgb.plot.importance(var_imp, col = blue_palette)
 
 ```
-  After training XGBoost model at nrounds = 425, we calculate the importance score and plot it.
-In XGBoost  models, feature importance scores indicate the relative importance of each input feature (or predictor variable) in contributing to the model's predictive performance. 
+  
+  After training XGBoost model at nrounds = 425, we calculate the importance score for each features and plot it. In XGBoost  models, feature importance scores indicate the relative importance of each input feature (or predictor variable) in contributing to the model's predictive performance. From the importance plot we can see that "cp" which stands for the chest pain type receives the highest importance score. 
 
 ***Prediction and Visualization:***
 ```{r}
@@ -150,7 +156,7 @@ testframe <- as.data.frame(conf_matrix$table)
 testframe$Prediction <- factor(testframe$Prediction, levels=rev(levels(testframe$Prediction)))
 ```
     
-    Make predictions on the test data. The threshold of 0.5 is applied to convert probabilities to binary predictions, and the model generates a confusion matrix using the predicted values  and actual test labels.Then, convert the confusion matrix to a data frame for visualizations and rearrange the levels of the Prediction variable to ensure correct plotting order.
+  Make predictions on the test data. The threshold of 0.5 is applied to convert probabilities to binary predictions, and the model generates a confusion matrix using the predicted values and actual test labels. A confusion matrix allows us to see how many predictions the models make correct or wrong. The function confusionMatrix() also gives us the ensitivity and Specificity automatically. Then, convert the confusion matrix to a data frame for visualizations and rearrange the levels of the Prediction variable to ensure correct plotting order.
     
 ```{r}
 ggplot(testframe, aes(Prediction,Reference, fill= Freq)) +

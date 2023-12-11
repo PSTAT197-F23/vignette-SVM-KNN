@@ -51,11 +51,6 @@ dataset1 = cbind(categorical_var,numeric_var)
 head(dataset1)
 ```
 
-```{r}
-df_outliers<-as.data.frame(dataset1 %>%
-                  select("trtbps","thalachh","chol","oldpeak"))
-```
-
 
 ```{r}
 outliers <- function(x) { 
@@ -169,10 +164,6 @@ plt <- as.data.frame(cm$table)
 plt$Prediction <- factor(plt$test_pred, levels=rev(levels(plt$test_pred)))
 ```
 
-```{r}
-cm
-```
-
 
 ```{r}
 ggplot(plt, aes(Prediction,Var2, fill= Freq)) +
@@ -184,16 +175,4 @@ ggplot(plt, aes(Prediction,Var2, fill= Freq)) +
 ```
 
 
-```{r}
-set.seed(100)
-svm_acc <- cm$overall["Accuracy"]
-#plot confusion Matrix 
-testing$pred <- test_pred
-
-ggplot(testing, aes(output, pred, fill = Freq)) +
-  geom_tile() + geom_text(aes(label=Freq)) +
-  labs(title="Confusion Matrix",
-       y="Predicted",
-       x="Truth")
-```
 

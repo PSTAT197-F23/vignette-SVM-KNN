@@ -111,7 +111,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="predictive-modeling-for-heart-disease" class="level2">
 <h2 class="anchored" data-anchor-id="predictive-modeling-for-heart-disease">Predictive Modeling for Heart Disease</h2>
 <p>The research aims to develop accurate and efficient models to aid in early detection and intervention strategies for improved patient outcomes.</p>
-<p>The predictive models, <strong>XGBoost</strong> and <strong>Support</strong> Vector Machine (SVM), were selected for their capabilities in handling complex dataset and their potential in accurately identifying heart disease.</p>
+<p>The predictive models, <strong>XGBoost</strong> and <strong>Support Vector Machine (SVM)</strong>, were selected for their capabilities in handling complex dataset and their potential in accurately identifying heart disease.</p>
 <div class="cell" data-hash="vignette_cache/html/unnamed-chunk-1_2c07c28ae949e61d2fc49496b6b88439">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Load neccessary libraries and the dataset</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(xgboost)</span>
@@ -151,12 +151,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>test_x <span class="ot">=</span> <span class="fu">data.matrix</span>(heart_test[, <span class="sc">-</span><span class="dv">14</span>])</span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>test_y <span class="ot">=</span> heart_test[, <span class="dv">14</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Using initial_split() from the rsample package to divide the dataset into training (80%) and testing (20%) sets. This ensures a balanced distribution of classes (stratified by the output variable).</p>
+<p>Using initial_split() from the rsample package to divide the dataset into training (80%) and testing (20%) sets. This ensures a balanced distribution of classes (stratified by the output variable). Partition of the data is performed randomly, so for reproduction purposes, we need to set seed for this process where set.seed() needs to be executed with the splitting code at the same time.</p>
+<p>We also separate the labels and the features to be used in the prediction task in a later stage.</p>
 <p><strong><em>Converting Train and Test into xgb.DMatrix Format:</em></strong></p>
 <div class="cell" data-hash="vignette_cache/html/unnamed-chunk-4_bb1129718435e1069692eb86ac724933">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>xgb_train <span class="ot">=</span> <span class="fu">xgb.DMatrix</span>(<span class="at">data =</span> train_x, <span class="at">label =</span> train_y)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>xgb_test <span class="ot">=</span> <span class="fu">xgb.DMatrix</span>(<span class="at">data =</span> test_x, <span class="at">label =</span> test_y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>XGBoost package allows us to group the data into a Dmatrix which can be directly inputted into the training process.</p>
 <p><strong><em>Using Cross-Validation to Find Optimal Number of Iterations:</em></strong></p>
 <div class="cell" data-hash="vignette_cache/html/unnamed-chunk-5_05fe4f02830ef8c50224fc26b52d9fdb">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>param_list <span class="ot">=</span> <span class="fu">list</span>(</span>
@@ -223,6 +225,7 @@ Stopping. Best iteration:
 [354]   train-logloss:0.227869+0.010424 test-logloss:0.412709+0.058639</code></pre>
 </div>
 </div>
+<p>The function sgb.cv can take in various parameters, which is explained in the following section:</p>
 <p>•<strong>booster</strong>: It specifies the type of booster to use. ‘gbtree’ indicates that the booster is a tree-based model using gradient boosting.</p>
 <p>•<strong>objective</strong>: ‘binary:logistic’ implies the selected type of loss function for binary classification, which minimizes the logistic loss for binary outcomes.</p>
 <p>•<strong>eta</strong>: It controls the step size shrinkage used in updating weights during the boosting process.</p>
@@ -230,7 +233,7 @@ Stopping. Best iteration:
 <p>•<strong>max_depth</strong>: This parameter determines the maximum depth of each tree in the boosting process. Higher values allow the model to capture more complex relationships but may lead to overfitting if not controlled properly.</p>
 <p>•<strong>subsample</strong>: It defines the fraction of samples to be used for training each tree.</p>
 <p>•<strong>colsample_bytree</strong>: This parameter denotes the fraction of features (columns) to be randomly sampled for each tree. A value of 0.5 implies that only 50% of the features will be considered for splitting at each node.</p>
-<p>Using xgb.cv() to perform k-fold cross-validation (nfold = 5) on the training data (xgb_train) to determine the optimal number of boosting rounds (nrounds) while avoiding overfitting. Early stopping is implemented (early_stopping_rounds) to halt training if no improvement occurs.</p>
+<p>Using xgb.cv() to perform k-fold cross-validation (nfold = 5) on the training data (xgb_train) to determine the optimal number of boosting rounds (nrounds) while avoiding overfitting. Early stopping is implemented (early_stopping_rounds) to halt training if no improvement occurs (when the train loss and test loss does not have significant decrease).</p>
 <p><strong>The best iteration is 452 in this case.</strong></p>
 <p><strong><em>Using the Best Iteration Round to Perform Model Training:</em></strong></p>
 <div class="cell" data-hash="vignette_cache/html/unnamed-chunk-6_06c15033d77ed78a8fb6b7fe7d044ffb">
@@ -246,7 +249,7 @@ Stopping. Best iteration:
 <p><img src="vignette_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>After training XGBoost model at nrounds = 425, we calculate the importance score and plot it. In XGBoost models, feature importance scores indicate the relative importance of each input feature (or predictor variable) in contributing to the model’s predictive performance.</p>
+<p>After training XGBoost model at nrounds = 425, we calculate the importance score for each features and plot it. In XGBoost models, feature importance scores indicate the relative importance of each input feature (or predictor variable) in contributing to the model’s predictive performance. From the importance plot we can see that “cp” which stands for the chest pain type receives the highest importance score.</p>
 <p><strong><em>Prediction and Visualization:</em></strong></p>
 <div class="cell" data-hash="vignette_cache/html/unnamed-chunk-7_b00ca6737b687cdd48c14fed0a8c1947">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3435</span>)</span>
@@ -287,12 +290,12 @@ Prediction  0  1
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>testframe <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(conf_matrix<span class="sc">$</span>table)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>testframe<span class="sc">$</span>Prediction <span class="ot">&lt;-</span> <span class="fu">factor</span>(testframe<span class="sc">$</span>Prediction, <span class="at">levels=</span><span class="fu">rev</span>(<span class="fu">levels</span>(testframe<span class="sc">$</span>Prediction)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<pre><code>Make predictions on the test data. The threshold of 0.5 is applied to convert probabilities to binary predictions, and the model generates a confusion matrix using the predicted values  and actual test labels.Then, convert the confusion matrix to a data frame for visualizations and rearrange the levels of the Prediction variable to ensure correct plotting order.</code></pre>
+<p>Make predictions on the test data. The threshold of 0.5 is applied to convert probabilities to binary predictions, and the model generates a confusion matrix using the predicted values and actual test labels. A confusion matrix allows us to see how many predictions the models make correct or wrong. The function confusionMatrix() also gives us the ensitivity and Specificity automatically. Then, convert the confusion matrix to a data frame for visualizations and rearrange the levels of the Prediction variable to ensure correct plotting order.</p>
 <div class="cell" data-hash="vignette_cache/html/unnamed-chunk-8_8fa4dabdf61b51340eb4ae0e0490fb58">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(testframe, <span class="fu">aes</span>(Prediction,Reference, <span class="at">fill=</span> Freq)) <span class="sc">+</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>() <span class="sc">+</span> <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label=</span>Freq)) <span class="sc">+</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient</span>(<span class="at">low=</span><span class="st">"white"</span>, <span class="at">high=</span><span class="st">"#009194"</span>) <span class="sc">+</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Reference"</span>,<span class="at">y =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(testframe, <span class="fu">aes</span>(Prediction,Reference, <span class="at">fill=</span> Freq)) <span class="sc">+</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>() <span class="sc">+</span> <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label=</span>Freq)) <span class="sc">+</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient</span>(<span class="at">low=</span><span class="st">"white"</span>, <span class="at">high=</span><span class="st">"#009194"</span>) <span class="sc">+</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Reference"</span>,<span class="at">y =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="vignette_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
 </div>

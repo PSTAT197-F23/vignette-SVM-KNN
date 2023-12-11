@@ -108,7 +108,7 @@ xgbcv = xgb.cv(params = param_list,
                maximize = F)
 ```
   
-  The function sgb.cv can take in various parameters, which is explained in the following section. 
+  The function sgb.cv can take in various parameters, which is explained in the following section: 
   
   •**booster**: It specifies the type of booster to use. 'gbtree' indicates that the booster is a tree-based model using gradient boosting.
 

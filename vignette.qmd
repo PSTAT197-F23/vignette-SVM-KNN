@@ -1,1 +1,167 @@
+---
+title: "Vignette: Heart Attack Prediction"
+author: "Lu Liu, Haoran Yan, Shuai Yuan, Irena Wong, and Molata Fu"
+date: "2023/12/10"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+    code_folding: hide
+    toc_depth: 4
+  pdf_document:
+    toc: yes
+    toc_depth: '4'
+execute:
+  message: false
+  warning: false
+  echo: true
+  cache: true
+---
+```{r setup, echo=FALSE,message = FALSE, warning = FALSE}
+library(knitr)
+# set global chunk options: images will be 7x5 inches
+knitr::opts_chunk$set(fig.width=7, fig.height=5)
+
+options(digits = 4)
+
+# debug latex
+options(tinytex.verbose = TRUE)
+```
+## Predictive Modeling for Heart Disease
+
+The research aims to develop accurate and efficient models to aid in early detection and intervention strategies for improved patient outcomes.
+
+The predictive models, **XGBoost** and **Support** Vector Machine (SVM), were selected for their capabilities in handling complex dataset and their potential in accurately identifying heart disease.
+
+
+```{r,message = FALSE, warning = FALSE}
+#Load neccessary libraries and the dataset
+library(xgboost)
+library(rsample)
+library(caret)
+library(dplyr)
+
+setwd("C:/Users/molat/OneDrive/Documents/GitHub/vignette-binary-logistic-regression")
+load("data/heart.rda")
+
+```
+
+## XGBoost Model
+```{r,message = FALSE, warning = FALSE}
+heart$cp <- as.factor(heart$cp)
+heart$fbs <- as.factor(heart$fbs)
+heart$restecg <- as.factor(heart$restecg)
+heart$exng <- as.factor(heart$exng)
+heart$caa <- as.factor(heart$caa)
+
+heart$thall <- as.factor(heart$thall)
+
+heart$sex <- as.factor(heart$sex)
+heart$slp <- as.factor(heart$slp)
+
+```
+XGBoost require numerical input for modeling. Converting categorical variables to factors ensures that these variables are encoded as numerical values that the algorithm can process.
+
+***Splitting the Data into Training and Testing Sets:***
+```{r,message = FALSE, warning = FALSE}
+set.seed(3435)
+heart_split <- initial_split(heart, strata = output, prop = 0.8)
+heart_train <- training(heart_split)
+heart_test <- testing(heart_split)
+
+train_x <- data.matrix(heart_train[, -14])
+train_y <- heart_train[,14]
+
+test_x = data.matrix(heart_test[, -14])
+test_y = heart_test[, 14]
+```
+Using initial_split() from the rsample package to divide the dataset into training (80%) and testing (20%) sets. This ensures a balanced distribution of classes (stratified by the output variable).
+
+***Converting Train and Test into xgb.DMatrix Format:***
+```{r}
+xgb_train = xgb.DMatrix(data = train_x, label = train_y)
+xgb_test = xgb.DMatrix(data = test_x, label = test_y)
+```
+
+
+***Using Cross-Validation to Find Optimal Number of Iterations:***
+```{r,message = FALSE, warning = FALSE}
+param_list = list(
+  booster = 'gbtree',
+  objective = "binary:logistic",
+  eta = 0.01,
+  gamma = 1,
+  max_depth = 6,
+  subsample = 0.8,
+  colsample_bytree = 0.5
+)
+
+xgbcv = xgb.cv(params = param_list,
+               data = xgb_train,
+               nrounds = 500,
+               nfold = 5,
+               print_every_n = 10,
+               early_stopping_rounds = 30,
+               maximize = F)
+```
+  •**booster**: It specifies the type of booster to use. 'gbtree' indicates that the booster is a tree-based model using gradient boosting.
+
+  •**objective**:  'binary:logistic' implies the selected type of loss function for binary classification, which minimizes the logistic loss for binary outcomes.
+
+  •**eta**: It controls the step size shrinkage used in updating weights during the boosting process.
+
+  •**gamma**: It represents the minimum loss reduction required to make a further partition on a leaf node of the tree. A higher gamma value leads to a more conservative model by preventing overfitting.
+
+  •**max_depth**: This parameter determines the maximum depth of each tree in the boosting process. Higher values allow the model to capture more complex relationships but may lead to overfitting if not controlled properly.
+
+  •**subsample**: It defines the fraction of samples to be used for training each tree.
+
+  •**colsample_bytree**: This parameter denotes the fraction of features (columns) to be randomly sampled for each tree. A value of 0.5 implies that only 50% of the features will be considered for splitting at each node.
+
+  Using xgb.cv() to perform k-fold cross-validation (nfold = 5) on the training data (xgb_train) to determine the optimal number of boosting rounds (nrounds) while avoiding overfitting. Early stopping is implemented (early_stopping_rounds) to halt training if no improvement occurs.
+
+**The best iteration is 452 in this case.**
+
+***Using the Best Iteration Round to Perform Model Training:***
+```{r}
+set.seed(3435)
+final.m = xgb.train(params = param_list, data = xgb_train, nrounds = 425, verbose = 0)
+var_imp = xgb.importance(
+  feature_names = setdiff(names(train),
+                          c("output")),
+  model = final.m)
+blue_palette <- colorRampPalette(c("lightblue", "darkblue"))(length(heart) -1)
+xgb.plot.importance(var_imp, col = blue_palette)
+
+```
+  After training XGBoost model at nrounds = 425, we calculate the importance score and plot it.
+In XGBoost  models, feature importance scores indicate the relative importance of each input feature (or predictor variable) in contributing to the model's predictive performance. 
+
+***Prediction and Visualization:***
+```{r}
+set.seed(3435)
+predictions <- predict(final.m, newdata = test_x)
+predictions <- as.numeric(predictions > 0.5)
+
+conf_matrix <- confusionMatrix(as.factor(predictions), as.factor(test_y))
+conf_matrix
+
+testframe <- as.data.frame(conf_matrix$table)
+testframe$Prediction <- factor(testframe$Prediction, levels=rev(levels(testframe$Prediction)))
+```
+    
+    Make predictions on the test data. The threshold of 0.5 is applied to convert probabilities to binary predictions, and the model generates a confusion matrix using the predicted values  and actual test labels.Then, convert the confusion matrix to a data frame for visualizations and rearrange the levels of the Prediction variable to ensure correct plotting order.
+    
+```{r}
+ggplot(testframe, aes(Prediction,Reference, fill= Freq)) +
+  geom_tile() + geom_text(aes(label=Freq)) +
+  scale_fill_gradient(low="white", high="#009194") +
+  labs(x = "Reference",y = "Prediction")
+
+```
+  
+  Finally, plot the confusion matrix to display the frequency of correct and incorrect predictions with gradient colors representing frequency levels.
+
+## Support Vector Machine (SVM) Model
+
 

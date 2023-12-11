@@ -28,7 +28,7 @@ options(tinytex.verbose = TRUE)
 ## Library Loading
 
 ```{r}
-library(gbm)
+library(xgboost)
 library(rsample)
 library(caret)
 library(dplyr)
@@ -51,11 +51,11 @@ heart$caa <- as.factor(heart$caa)
 
 heart$thall <- as.factor(heart$thall)
 
-heart$output <- as.factor(heart$output)
 heart$sex <- as.factor(heart$sex)
 heart$slp <- as.factor(heart$slp)
 ```
 
+Note: explain that we need to turn categorical variables into factors
 
 ## Splitting the Data
 
@@ -67,36 +67,86 @@ heart_train <- training(heart_split)
 heart_test <- testing(heart_split)
 ```
 
-## Training the model
-
-```{r}
-model_gbm = gbm(output ~.,
-              data = heart_train,
-              distribution = "multinomial",
-              cv.folds = 10,
-              shrinkage = .01,
-              n.minobsinnode = 10,
-              n.trees = 1000)
-summary(model_gbm)
-```
-
+Note: Data Splitting
 
 
 ```{r}
-pred_test = predict.gbm(object = model_gbm,
-                   newdata = heart_test,
-                   n.trees = 1000,           # 500 tress to be built
-                   type = "response")
+train_x <- data.matrix(heart_train[, -14])
+train_y <- heart_train[,14]
 
-class_names = as.numeric(colnames(pred_test)[apply(pred_test, 1, which.max)])
-
-result = data.frame(heart_test$output, class_names)
+test_x = data.matrix(heart_test[, -14])
+test_y = heart_test[, 14]
 ```
 
 
 ```{r}
-conf_mat = confusionMatrix(heart_test$output, as.factor(class_names))
-print(conf_mat)
+xgb_train = xgb.DMatrix(data = train_x, label = train_y)
+xgb_test = xgb.DMatrix(data = test_x, label = test_y)
 ```
+
+Note: Converting train and test into xgb.DMatrix format
+
+## Cross validation
+
+```{r}
+set.seed(3435)
+param_list = list(
+booster = 'gbtree',  
+objective = "binary:logistic",
+eta = 0.01,
+gamma = 1,
+max_depth = 6,
+subsample = 0.8,
+colsample_bytree = 0.5
+)
+
+xgbcv = xgb.cv(params = param_list,
+            data = xgb_train,
+            nrounds = 500,
+            nfold = 5,
+            print_every_n = 10,
+            early_stopping_rounds = 30,
+            maximize = F)
+```
+
+Note: explain each parameters, k-fold strategy helps us determine the best number of rounds according to the log function to avoid overfitting. The best iteration is 452 in this case. 
+
+## Model Training
+
+```{r}
+set.seed(3435)
+final.m = xgb.train(params = param_list, data = xgb_train, nrounds = 425, verbose = 0)
+var_imp = xgb.importance(
+            feature_names = setdiff(names(train),
+            c("output")),
+            model = final.m)
+blue_palette <- colorRampPalette(c("lightblue", "darkblue"))(length(heart) -1)
+xgb.plot.importance(var_imp, col = blue_palette)
+```
+
+Note: Training XGBoost model at nrounds = 425, calculate the importance score and plot it
+
+## Prediction and Visualization
+
+```{r}
+set.seed(3435)
+predictions <- predict(final.m, newdata = test_x)
+predictions <- as.numeric(predictions > 0.5)
+
+conf_matrix <- confusionMatrix(as.factor(predictions), as.factor(test_y))
+conf_matrix
+
+testframe <- as.data.frame(conf_matrix$table)
+testframe$Prediction <- factor(testframe$Prediction, levels=rev(levels(testframe$Prediction)))
+
+ggplot(testframe, aes(Prediction,Reference, fill= Freq)) +
+        geom_tile() + geom_text(aes(label=Freq)) +
+        scale_fill_gradient(low="white", high="#009194") +
+        labs(x = "Reference",y = "Prediction")
+
+```
+
+Note: Make prodiction and visualization
+
 
 

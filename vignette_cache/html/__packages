@@ -5,3 +5,12 @@ ggplot2
 lattice
 caret
 dplyr
+tidyr
+tidyverse
+tibble
+readr
+purrr
+stringr
+forcats
+lubridate
+caTools

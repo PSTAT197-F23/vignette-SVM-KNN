@@ -40,7 +40,10 @@ library(xgboost)
 library(rsample)
 library(caret)
 library(dplyr)
-
+library(ggplot2)
+library(tidyr)
+library(tidyverse)
+library(caTools)
 setwd("C:/Users/molat/OneDrive/Documents/GitHub/vignette-binary-logistic-regression")
 load("data/heart.rda")
 
@@ -158,6 +161,8 @@ testframe$Prediction <- factor(testframe$Prediction, levels=rev(levels(testframe
     
   Make predictions on the test data. The threshold of 0.5 is applied to convert probabilities to binary predictions, and the model generates a confusion matrix using the predicted values and actual test labels. A confusion matrix allows us to see how many predictions the models make correct or wrong. The function confusionMatrix() also gives us the ensitivity and Specificity automatically. Then, convert the confusion matrix to a data frame for visualizations and rearrange the levels of the Prediction variable to ensure correct plotting order.
     
+   **In this case, the model accuracy is 0.82.**
+    
 ```{r}
 ggplot(testframe, aes(Prediction,Reference, fill= Freq)) +
   geom_tile() + geom_text(aes(label=Freq)) +
@@ -170,4 +175,145 @@ ggplot(testframe, aes(Prediction,Reference, fill= Freq)) +
 
 ## Support Vector Machine (SVM) Model
 
+classify the variables into categorical and numerical variables again:
+```{r}
+#select the numerical variables
+numeric_var <-heart %>% 
+  select("age","trtbps","chol","thalachh","oldpeak")
+#select the categorical values 
+categorical_var<- heart %>%
+  select("sex","cp","fbs","restecg","exng","slp","caa",
+         "thall","output")%>%
+  mutate_if(is.numeric, as.factor)
+
+#combine the categorical  and numerical values
+dataset1 = cbind(categorical_var,numeric_var)
+```
+
+Give a preview of dataset1:
+```{r}
+head(dataset1)
+```
+
+Remove outliers from dataset1 based on the IQR method and save it as dataset2:
+```{r}
+outliers <- function(x) { 
+ #IQR
+  Q1 <- quantile(x, probs=.25) 
+  Q3 <- quantile(x, probs=.75) 
+  iqr = Q3-Q1 
+ 
+ #Upper Range
+ upper_limit = Q3 + (iqr*1.5) 
+ #Lower Range Eliminating Outliers 
+ lower_limit = Q1 - (iqr*1.5) 
+ 
+ x > upper_limit | x < lower_limit 
+} 
+# remove the outliers
+remove_outliers <- function(df_outliers, cols = names(df_outliers)) { 
+  for (col in cols) { 
+    df_outliers<- df_outliers[!outliers(df_outliers[[col]]),] 
+  } 
+  df_outliers 
+}
+# we have removed the outliers from the selected features 
+# create new dataset without outliers
+dataset2<-remove_outliers(dataset1,c("trtbps","oldpeak" ,"thalachh", "chol"))
+```
+
+***Feature Selection:***
+```{r}
+set.seed(100)
+#create the subsets for sizes
+subsets <- c(1:8,10,13)
+# define the control using random forest selection 
+ctrl <- rfeControl(functions = rfFuncs,
+                   method = "repeatedcv",
+                   repeats = 5,
+                   number = 10,
+                   verbose = FALSE)
+
+#run the RFE
+results <- rfe(x=dataset2[, c(1:8,10:14)], y=dataset2$output,
+                 sizes = subsets,
+                 rfeControl = ctrl)
+
+# Print the selected features
+print(predictors(results))
+```
+
+  We utilize Recursive Feature Elimination with cross-validation to determine the most important subset of features from dataset2 that best predict the output variable (output). The printed output reveals the selected features deemed most significant by the RFE process for subsequent modeling.
+
+```{r}
+set.seed(100)
+varimp_data <- data.frame(feature = row.names(varImp(results))[1:9],
+                          importance = varImp(results)[1:9, 1])
+
+ggplot(data = varimp_data, 
+       aes(x = reorder(feature, -importance), y = importance, fill = feature)) +
+  geom_bar(stat="identity") + labs(x = "Features", y = "Variable Importance") + 
+  geom_text(aes(label = round(importance, 2)), vjust=1.6, color="white", size=4) + 
+  theme_bw() + theme(legend.position = "none")
+```
+
+  The bar plot visually represents the importance of the top 9 features in descending order, where the length of each bar indicates the respective importance score. Higher bars denote features with greater importance in the predictive model. This helps understand the relative significance of different features in predicting the target variable.
+
+***Spliting the Data:***
+```{r}
+set.seed(100)
+data1 <- dataset2 %>%
+  select(predictors(results), "output")
+
+
+intrain <- createDataPartition(y = data1$output, p= 0.7, list = FALSE)
+training <- heart[intrain,]
+testing <- heart[-intrain,]
+
+training[["output"]] = factor(training[["output"]])
+
+```
+
+***Model Construction:***
+```{r}
+set.seed(100)
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
+
+svm_Linear <- train(output ~., data = training, method = "svmLinear",
+trControl=trctrl,
+preProcess = c("center", "scale"),
+tuneLength = 10)
+
+svm_Linear
+```
+
+  Construct an SVM model with a linear kernel using repeated cross-validation (repeatedcv) for robust evaluation. It preprocesses the data by centering and scaling the predictor variables and evaluates the model's performance based on the specified control parameters. The resulting svm_Linear object contains information about the trained SVM model, which can be further examined to assess model performance and obtain predictions on new data.
+
+**In this case, the model accuracy is 0.8492.**
+
+***Make prediction:***
+```{r}
+set.seed(100)
+test_pred <- predict(svm_Linear, newdata = testing)
+test_pred
+cm = caret::confusionMatrix(table(test_pred, testing$output))
+cm$table
+
+cm <- confusionMatrix(table(test_pred, testing$output))
+
+plt <- as.data.frame(cm$table)
+plt$Prediction <- factor(plt$test_pred, levels=rev(levels(plt$test_pred)))
+```
+
+  Apply the trained SVM model on the testing dataset and create a confusion matrix to evaluate the model's predictive performance by comparing predicted values to actual values. The confusion matrix provides insights into the model's accuracy, precision, recall, and other classification metrics.
+
+**Confusion Matrix Visualization**
+```{r}
+ggplot(plt, aes(Prediction,Var2, fill= Freq)) +
+        geom_tile() + geom_text(aes(label=Freq)) +
+        scale_fill_gradient(low="white", high="#009194") +
+        labs(x = "Reference",y = "Prediction") +
+        scale_x_discrete(labels=c("Class_1","Class_0")) +
+        scale_y_discrete(labels=c("Class_0","Class_1"))
+```
 

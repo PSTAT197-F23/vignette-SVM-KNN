@@ -161,7 +161,26 @@ test_pred
 
 ```{r}
 cm = caret::confusionMatrix(table(test_pred, testing$output))
+cm$table
+
+cm <- confusionMatrix(table(test_pred, testing$output))
+
+plt <- as.data.frame(cm$table)
+plt$Prediction <- factor(plt$test_pred, levels=rev(levels(plt$test_pred)))
+```
+
+```{r}
 cm
+```
+
+
+```{r}
+ggplot(plt, aes(Prediction,Var2, fill= Freq)) +
+        geom_tile() + geom_text(aes(label=Freq)) +
+        scale_fill_gradient(low="white", high="#009194") +
+        labs(x = "Reference",y = "Prediction") +
+        scale_x_discrete(labels=c("Class_1","Class_0")) +
+        scale_y_discrete(labels=c("Class_0","Class_1"))
 ```
 
 
@@ -170,8 +189,9 @@ set.seed(100)
 svm_acc <- cm$overall["Accuracy"]
 #plot confusion Matrix 
 testing$pred <- test_pred
-ggplot(testing, aes(output, pred, color = output)) +
-  geom_jitter(width = 0.2, height = 0.1, size=2) +
+
+ggplot(testing, aes(output, pred, fill = Freq)) +
+  geom_tile() + geom_text(aes(label=Freq)) +
   labs(title="Confusion Matrix",
        y="Predicted",
        x="Truth")

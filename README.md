@@ -65,25 +65,30 @@ root directory
    ├── drafts
    ├── EDA.R
    ├── model-fitting.R
-├── img
-├── vignette.qmd
-├── vignette.html
+├── results
+   ├── vignette_files
+      ├── figure-html
+      ├── libs
+   ├── vignette.qmd
+   ├── vignette.html
 ├── README.md 
 └── .gitignore
 ```
 
-The data folder contains our raw, heart attack dataset and our preprocessed version of the dataset. The scripts folder contains a drafts folder, which is where group members can keep their work, and EDA.R and model-fitting.R, which are scripts with line annotations that replicate the results shown in the primary vignette document for the respective parts. Images are kept in the img folder, and vignette.qmd is our primary vignette document.
+The data folder contains our raw, heart attack dataset and our preprocessed version of the dataset. The scripts folder contains a drafts folder, which is where group members can keep their work, and EDA.R and model-fitting.R, which are scripts with line annotations that replicate the results shown in the primary vignette document for the respective parts.
+
+**The results folder contains vignette.qmd and vignette.html, which are the primary vignette documents.** The results folder also contains the folder vignette_files with the folder figure-html, which contains the plots in the vignette HTML.
 
 ## References
 
-Our data: https://www.kaggle.com/datasets/rashikrahmanpritom/heart-attack-analysis-prediction-dataset?select=heart.csv
+Our data: <https://www.kaggle.com/datasets/rashikrahmanpritom/heart-attack-analysis-prediction-dataset?select=heart.csv>
 
 #### Learn about SVM!
-- https://www.youtube.com/watch?v=_YPScrckx28
-- https://scikit-learn.org/stable/modules/svm.html
+
+-   <https://www.youtube.com/watch?v=_YPScrckx28>
+-   <https://scikit-learn.org/stable/modules/svm.html>
 
 #### Learn about XGBoost!
-- https://www.youtube.com/watch?v=TyvYZ26alZs
-- https://www.analyticsvidhya.com/blog/2016/01/xgboost-algorithm-easy-steps/
 
-
+-   <https://www.youtube.com/watch?v=TyvYZ26alZs>
+-   <https://www.analyticsvidhya.com/blog/2016/01/xgboost-algorithm-easy-steps/>

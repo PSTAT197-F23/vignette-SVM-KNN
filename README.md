@@ -64,7 +64,8 @@ root directory
 ├── scripts
    ├── drafts
    ├── EDA.R
-   ├── model-fitting.R
+   ├── SVM-fitting.R
+   ├── XGBoost-fitting.R
 ├── results
    ├── vignette_files
       ├── figure-html
@@ -75,7 +76,7 @@ root directory
 └── .gitignore
 ```
 
-The data folder contains our raw, heart attack dataset and our preprocessed version of the dataset. The scripts folder contains a drafts folder, which is where group members can keep their work, and EDA.R and model-fitting.R, which are scripts with line annotations that replicate the results shown in the primary vignette document for the respective parts.
+The data folder contains our raw, heart attack dataset and our preprocessed version of the dataset. The scripts folder contains a drafts folder, which is where group members can keep their work, and EDA.R, SVM-fitting.R, and XGBoost-fitting.R, which are scripts with line annotations that replicate the results shown in the primary vignette document for the respective parts.
 
 **The results folder contains vignette.qmd and vignette.html, which are the primary vignette documents.** The results folder also contains the folder vignette_files with the folder figure-html, which contains the plots in the vignette HTML.
 

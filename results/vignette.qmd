@@ -175,18 +175,15 @@ ggplot(testframe, aes(Prediction,Reference, fill= Freq)) +
 
 ## Support Vector Machine (SVM) Model
 
-classify the variables into categorical and numerical variables again:
+Classify the variables into categorical and numerical variables again:
 ```{r}
-#select the numerical variables
 numeric_var <-heart %>% 
   select("age","trtbps","chol","thalachh","oldpeak")
-#select the categorical values 
 categorical_var<- heart %>%
   select("sex","cp","fbs","restecg","exng","slp","caa",
          "thall","output")%>%
   mutate_if(is.numeric, as.factor)
 
-#combine the categorical  and numerical values
 dataset1 = cbind(categorical_var,numeric_var)
 ```
 
@@ -195,37 +192,36 @@ Give a preview of dataset1:
 head(dataset1)
 ```
 
-Remove outliers from dataset1 based on the IQR method and save it as dataset2:
+Here, we define the outliers as $[Q1 - 1.5IQR, Q3 +1.5IQR]$, and we want to exclude some leverage points from certain variables so that our feature selection process will be less likely interfered by extreme values. For practive, we can summarize the data and explore the variables that have abnormal values. For our demonstration, we choose "trtbps","oldpeak" ,"thalachh", and "chol".
+
+We then remove outliers from dataset1 based on the IQR method and save it in dataset2.
 ```{r}
 outliers <- function(x) { 
- #IQR
   Q1 <- quantile(x, probs=.25) 
   Q3 <- quantile(x, probs=.75) 
   iqr = Q3-Q1 
  
- #Upper Range
  upper_limit = Q3 + (iqr*1.5) 
- #Lower Range Eliminating Outliers 
+
  lower_limit = Q1 - (iqr*1.5) 
  
  x > upper_limit | x < lower_limit 
 } 
-# remove the outliers
+
 remove_outliers <- function(df_outliers, cols = names(df_outliers)) { 
   for (col in cols) { 
     df_outliers<- df_outliers[!outliers(df_outliers[[col]]),] 
   } 
   df_outliers 
 }
-# we have removed the outliers from the selected features 
-# create new dataset without outliers
+
 dataset2<-remove_outliers(dataset1,c("trtbps","oldpeak" ,"thalachh", "chol"))
 ```
 
 ***Feature Selection:***
 ```{r}
 set.seed(100)
-#create the subsets for sizes
+
 subsets <- c(1:8,10,13)
 # define the control using random forest selection 
 ctrl <- rfeControl(functions = rfFuncs,
@@ -239,11 +235,10 @@ results <- rfe(x=dataset2[, c(1:8,10:14)], y=dataset2$output,
                  sizes = subsets,
                  rfeControl = ctrl)
 
-# Print the selected features
 print(predictors(results))
 ```
 
-  We utilize Recursive Feature Elimination with cross-validation to determine the most important subset of features from dataset2 that best predict the output variable (output). The printed output reveals the selected features deemed most significant by the RFE process for subsequent modeling.
+We utilize Recursive Feature Elimination with cross-validation to determine the most important subset of features from dataset2 that best predict the output variable (output). The printed output reveals the selected features deemed most significant by the RFE process for subsequent modeling.
 
 ```{r}
 set.seed(100)
@@ -260,6 +255,8 @@ ggplot(data = varimp_data,
   The bar plot visually represents the importance of the top 9 features in descending order, where the length of each bar indicates the respective importance score. Higher bars denote features with greater importance in the predictive model. This helps understand the relative significance of different features in predicting the target variable.
 
 ***Spliting the Data:***
+
+We split the data to training and testing part with a proportion of 7:3.
 ```{r}
 set.seed(100)
 data1 <- dataset2 %>%
@@ -316,4 +313,4 @@ ggplot(plt, aes(Prediction,Var2, fill= Freq)) +
         scale_x_discrete(labels=c("Class_1","Class_0")) +
         scale_y_discrete(labels=c("Class_0","Class_1"))
 ```
-
+  Finally, plot the confusion matrix to display the frequency of correct and incorrect predictions with gradient colors representing frequency levels.

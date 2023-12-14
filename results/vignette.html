@@ -70,6 +70,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="vignette_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="vignette_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 </head>
 
@@ -112,7 +114,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="predictive-modeling-for-heart-disease">Predictive Modeling for Heart Disease</h2>
 <p>The research aims to develop accurate and efficient models to aid in early detection and intervention strategies for improved patient outcomes.</p>
 <p>The predictive models, <strong>XGBoost</strong> and <strong>Support Vector Machine (SVM)</strong>, were selected for their capabilities in handling complex dataset and their potential in accurately identifying heart disease.</p>
-<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-1_76d2047198b5ebdc625e453ada2106e5">
+<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-1_0dacf2ae19a928a567a2a962a10dbda1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Load neccessary libraries and the dataset</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(xgboost)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rsample)</span>
@@ -128,7 +130,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="xgboost-model" class="level2">
 <h2 class="anchored" data-anchor-id="xgboost-model">XGBoost Model</h2>
-<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-2_92cce030839c30e084c7fa3bbecd1757">
+<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-2_636d24389af10f8fd2fe1650ee68ca57">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>heart<span class="sc">$</span>cp <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(heart<span class="sc">$</span>cp)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>heart<span class="sc">$</span>fbs <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(heart<span class="sc">$</span>fbs)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>heart<span class="sc">$</span>restecg <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(heart<span class="sc">$</span>restecg)</span>
@@ -142,7 +144,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>XGBoost require numerical input for modeling. Converting categorical variables to factors ensures that these variables are encoded as numerical values that the algorithm can process.</p>
 <p><strong><em>Splitting the Data into Training and Testing Sets:</em></strong></p>
-<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-3_5435ef1f59de3f2c9b333ed28127f503">
+<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-3_16885f1ad305785d4a415cf257a16192">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3435</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>heart_split <span class="ot">&lt;-</span> <span class="fu">initial_split</span>(heart, <span class="at">strata =</span> output, <span class="at">prop =</span> <span class="fl">0.8</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>heart_train <span class="ot">&lt;-</span> <span class="fu">training</span>(heart_split)</span>
@@ -157,13 +159,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Using initial_split() from the rsample package to divide the dataset into training (80%) and testing (20%) sets. This ensures a balanced distribution of classes (stratified by the output variable). Partition of the data is performed randomly, so for reproduction purposes, we need to set seed for this process where set.seed() needs to be executed with the splitting code at the same time.</p>
 <p>We also separate the labels and the features to be used in the prediction task in a later stage.</p>
 <p><strong><em>Converting Train and Test into xgb.DMatrix Format:</em></strong></p>
-<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-4_bb1129718435e1069692eb86ac724933">
+<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-4_3a470c8e824c5e1f55232392e0847144">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>xgb_train <span class="ot">=</span> <span class="fu">xgb.DMatrix</span>(<span class="at">data =</span> train_x, <span class="at">label =</span> train_y)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>xgb_test <span class="ot">=</span> <span class="fu">xgb.DMatrix</span>(<span class="at">data =</span> test_x, <span class="at">label =</span> test_y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>XGBoost package allows us to group the data into a Dmatrix which can be directly inputted into the training process.</p>
 <p><strong><em>Using Cross-Validation to Find Optimal Number of Iterations:</em></strong></p>
-<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-5_05fe4f02830ef8c50224fc26b52d9fdb">
+<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-5_5a36b7f3b70595c715370ab1f92196aa">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>param_list <span class="ot">=</span> <span class="fu">list</span>(</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">booster =</span> <span class="st">'gbtree'</span>,</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">objective =</span> <span class="st">"binary:logistic"</span>,</span>
@@ -239,7 +241,7 @@ Stopping. Best iteration:
 <p>Using xgb.cv() to perform k-fold cross-validation (nfold = 5) on the training data (xgb_train) to determine the optimal number of boosting rounds (nrounds) while avoiding overfitting. Early stopping is implemented (early_stopping_rounds) to halt training if no improvement occurs (when the train loss and test loss does not have significant decrease).</p>
 <p><strong>The best iteration is 452 in this case.</strong></p>
 <p><strong><em>Using the Best Iteration Round to Perform Model Training:</em></strong></p>
-<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-6_06c15033d77ed78a8fb6b7fe7d044ffb">
+<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-6_df3ab61b56fa2c116ee26419996e0bf9">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3435</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>final.m <span class="ot">=</span> <span class="fu">xgb.train</span>(<span class="at">params =</span> param_list, <span class="at">data =</span> xgb_train, <span class="at">nrounds =</span> <span class="dv">425</span>, <span class="at">verbose =</span> <span class="dv">0</span>)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>var_imp <span class="ot">=</span> <span class="fu">xgb.importance</span>(</span>
@@ -254,7 +256,7 @@ Stopping. Best iteration:
 </div>
 <p>After training XGBoost model at nrounds = 425, we calculate the importance score for each features and plot it. In XGBoost models, feature importance scores indicate the relative importance of each input feature (or predictor variable) in contributing to the model’s predictive performance. From the importance plot we can see that “cp” which stands for the chest pain type receives the highest importance score.</p>
 <p><strong><em>Prediction and Visualization:</em></strong></p>
-<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-7_b00ca6737b687cdd48c14fed0a8c1947">
+<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-7_e2e746424f86e5133684939cecf3280e">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3435</span>)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>predictions <span class="ot">&lt;-</span> <span class="fu">predict</span>(final.m, <span class="at">newdata =</span> test_x)</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>predictions <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(predictions <span class="sc">&gt;</span> <span class="fl">0.5</span>)</span>
@@ -268,34 +270,34 @@ Stopping. Best iteration:
 Prediction  0  1
          0 21  4
          1  7 29
-                                          
-               Accuracy : 0.8197          
-                 95% CI : (0.7002, 0.9064)
-    No Information Rate : 0.541           
-    P-Value [Acc &gt; NIR] : 4.82e-06        
-                                          
-                  Kappa : 0.6339          
-                                          
- Mcnemar's Test P-Value : 0.5465          
-                                          
-            Sensitivity : 0.7500          
-            Specificity : 0.8788          
-         Pos Pred Value : 0.8400          
-         Neg Pred Value : 0.8056          
-             Prevalence : 0.4590          
-         Detection Rate : 0.3443          
-   Detection Prevalence : 0.4098          
-      Balanced Accuracy : 0.8144          
-                                          
-       'Positive' Class : 0               
-                                          </code></pre>
+                                      
+               Accuracy : 0.82        
+                 95% CI : (0.7, 0.906)
+    No Information Rate : 0.541       
+    P-Value [Acc &gt; NIR] : 4.82e-06    
+                                      
+                  Kappa : 0.634       
+                                      
+ Mcnemar's Test P-Value : 0.546       
+                                      
+            Sensitivity : 0.750       
+            Specificity : 0.879       
+         Pos Pred Value : 0.840       
+         Neg Pred Value : 0.806       
+             Prevalence : 0.459       
+         Detection Rate : 0.344       
+   Detection Prevalence : 0.410       
+      Balanced Accuracy : 0.814       
+                                      
+       'Positive' Class : 0           
+                                      </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>testframe <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(conf_matrix<span class="sc">$</span>table)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>testframe<span class="sc">$</span>Prediction <span class="ot">&lt;-</span> <span class="fu">factor</span>(testframe<span class="sc">$</span>Prediction, <span class="at">levels=</span><span class="fu">rev</span>(<span class="fu">levels</span>(testframe<span class="sc">$</span>Prediction)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Make predictions on the test data. The threshold of 0.5 is applied to convert probabilities to binary predictions, and the model generates a confusion matrix using the predicted values and actual test labels. A confusion matrix allows us to see how many predictions the models make correct or wrong. The function confusionMatrix() also gives us the ensitivity and Specificity automatically. Then, convert the confusion matrix to a data frame for visualizations and rearrange the levels of the Prediction variable to ensure correct plotting order.</p>
 <p><strong>In this case, the model accuracy is 0.82.</strong></p>
-<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-8_8fa4dabdf61b51340eb4ae0e0490fb58">
+<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-8_a4c625ff244ebb12863f414e126d9d49">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(testframe, <span class="fu">aes</span>(Prediction,Reference, <span class="at">fill=</span> Freq)) <span class="sc">+</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>() <span class="sc">+</span> <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label=</span>Freq)) <span class="sc">+</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient</span>(<span class="at">low=</span><span class="st">"white"</span>, <span class="at">high=</span><span class="st">"#009194"</span>) <span class="sc">+</span></span>
@@ -308,22 +310,19 @@ Prediction  0  1
 </section>
 <section id="support-vector-machine-svm-model" class="level2">
 <h2 class="anchored" data-anchor-id="support-vector-machine-svm-model">Support Vector Machine (SVM) Model</h2>
-<p>classify the variables into categorical and numerical variables again:</p>
-<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-9_3e70d7076b4f0b0aa6f0a0f2466553b0">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">#select the numerical variables</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>numeric_var <span class="ot">&lt;-</span>heart <span class="sc">%&gt;%</span> </span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="st">"age"</span>,<span class="st">"trtbps"</span>,<span class="st">"chol"</span>,<span class="st">"thalachh"</span>,<span class="st">"oldpeak"</span>)</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co">#select the categorical values </span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>categorical_var<span class="ot">&lt;-</span> heart <span class="sc">%&gt;%</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="st">"sex"</span>,<span class="st">"cp"</span>,<span class="st">"fbs"</span>,<span class="st">"restecg"</span>,<span class="st">"exng"</span>,<span class="st">"slp"</span>,<span class="st">"caa"</span>,</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>         <span class="st">"thall"</span>,<span class="st">"output"</span>)<span class="sc">%&gt;%</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_if</span>(is.numeric, as.factor)</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co">#combine the categorical  and numerical values</span></span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>dataset1 <span class="ot">=</span> <span class="fu">cbind</span>(categorical_var,numeric_var)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Classify the variables into categorical and numerical variables again:</p>
+<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-9_f35590bc98022467248e81a4c64c06a0">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>numeric_var <span class="ot">&lt;-</span>heart <span class="sc">%&gt;%</span> </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="st">"age"</span>,<span class="st">"trtbps"</span>,<span class="st">"chol"</span>,<span class="st">"thalachh"</span>,<span class="st">"oldpeak"</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>categorical_var<span class="ot">&lt;-</span> heart <span class="sc">%&gt;%</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="st">"sex"</span>,<span class="st">"cp"</span>,<span class="st">"fbs"</span>,<span class="st">"restecg"</span>,<span class="st">"exng"</span>,<span class="st">"slp"</span>,<span class="st">"caa"</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>         <span class="st">"thall"</span>,<span class="st">"output"</span>)<span class="sc">%&gt;%</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_if</span>(is.numeric, as.factor)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>dataset1 <span class="ot">=</span> <span class="fu">cbind</span>(categorical_var,numeric_var)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Give a preview of dataset1:</p>
-<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-10_9be5e189e624a3e65552642d068fbc6d">
+<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-10_1fb555054c6a08d006bb2e9816e80052">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dataset1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  sex cp fbs restecg exng slp caa thall output age trtbps chol thalachh oldpeak
@@ -335,36 +334,34 @@ Prediction  0  1
 6   1  0   0       1    0   1   0     1      1  57    140  192      148     0.4</code></pre>
 </div>
 </div>
-<p>Remove outliers from dataset1 based on the IQR method and save it as dataset2:</p>
-<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-11_5f4c15a00e15c116ff166e4775ef4f9e">
+<p>Here, we define the outliers as <span class="math inline">\([Q1 - 1.5IQR, Q3 +1.5IQR]\)</span>, and we want to exclude some leverage points from certain variables so that our feature selection process will be less likely interfered by extreme values. For practive, we can summarize the data and explore the variables that have abnormal values. For our demonstration, we choose “trtbps”,“oldpeak” ,“thalachh”, and “chol”.</p>
+<p>We then remove outliers from dataset1 based on the IQR method and save it in dataset2.</p>
+<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-11_6facb68281f7b25c9bf9dcd1789d364c">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>outliers <span class="ot">&lt;-</span> <span class="cf">function</span>(x) { </span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a> <span class="co">#IQR</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  Q1 <span class="ot">&lt;-</span> <span class="fu">quantile</span>(x, <span class="at">probs=</span>.<span class="dv">25</span>) </span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  Q3 <span class="ot">&lt;-</span> <span class="fu">quantile</span>(x, <span class="at">probs=</span>.<span class="dv">75</span>) </span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  iqr <span class="ot">=</span> Q3<span class="sc">-</span>Q1 </span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a> <span class="co">#Upper Range</span></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a> upper_limit <span class="ot">=</span> Q3 <span class="sc">+</span> (iqr<span class="sc">*</span><span class="fl">1.5</span>) </span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a> <span class="co">#Lower Range Eliminating Outliers </span></span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a> lower_limit <span class="ot">=</span> Q1 <span class="sc">-</span> (iqr<span class="sc">*</span><span class="fl">1.5</span>) </span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a> x <span class="sc">&gt;</span> upper_limit <span class="sc">|</span> x <span class="sc">&lt;</span> lower_limit </span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>} </span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="co"># remove the outliers</span></span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>remove_outliers <span class="ot">&lt;-</span> <span class="cf">function</span>(df_outliers, <span class="at">cols =</span> <span class="fu">names</span>(df_outliers)) { </span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (col <span class="cf">in</span> cols) { </span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    df_outliers<span class="ot">&lt;-</span> df_outliers[<span class="sc">!</span><span class="fu">outliers</span>(df_outliers[[col]]),] </span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>  } </span>
-<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>  df_outliers </span>
-<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a><span class="co"># we have removed the outliers from the selected features </span></span>
-<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a><span class="co"># create new dataset without outliers</span></span>
-<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>dataset2<span class="ot">&lt;-</span><span class="fu">remove_outliers</span>(dataset1,<span class="fu">c</span>(<span class="st">"trtbps"</span>,<span class="st">"oldpeak"</span> ,<span class="st">"thalachh"</span>, <span class="st">"chol"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  Q1 <span class="ot">&lt;-</span> <span class="fu">quantile</span>(x, <span class="at">probs=</span>.<span class="dv">25</span>) </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  Q3 <span class="ot">&lt;-</span> <span class="fu">quantile</span>(x, <span class="at">probs=</span>.<span class="dv">75</span>) </span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  iqr <span class="ot">=</span> Q3<span class="sc">-</span>Q1 </span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a> upper_limit <span class="ot">=</span> Q3 <span class="sc">+</span> (iqr<span class="sc">*</span><span class="fl">1.5</span>) </span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a> lower_limit <span class="ot">=</span> Q1 <span class="sc">-</span> (iqr<span class="sc">*</span><span class="fl">1.5</span>) </span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a> x <span class="sc">&gt;</span> upper_limit <span class="sc">|</span> x <span class="sc">&lt;</span> lower_limit </span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>} </span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>remove_outliers <span class="ot">&lt;-</span> <span class="cf">function</span>(df_outliers, <span class="at">cols =</span> <span class="fu">names</span>(df_outliers)) { </span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (col <span class="cf">in</span> cols) { </span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    df_outliers<span class="ot">&lt;-</span> df_outliers[<span class="sc">!</span><span class="fu">outliers</span>(df_outliers[[col]]),] </span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>  } </span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>  df_outliers </span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>dataset2<span class="ot">&lt;-</span><span class="fu">remove_outliers</span>(dataset1,<span class="fu">c</span>(<span class="st">"trtbps"</span>,<span class="st">"oldpeak"</span> ,<span class="st">"thalachh"</span>, <span class="st">"chol"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><strong><em>Feature Selection:</em></strong></p>
-<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-12_4a60378ef794bdcc9a77964dd049a0e7">
+<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-12_e5d3cfee8d8722bb77236a8d0cbcb0b4">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">100</span>)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co">#create the subsets for sizes</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>subsets <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,<span class="dv">10</span>,<span class="dv">13</span>)</span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># define the control using random forest selection </span></span>
 <span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>ctrl <span class="ot">&lt;-</span> <span class="fu">rfeControl</span>(<span class="at">functions =</span> rfFuncs,</span>
@@ -378,15 +375,14 @@ Prediction  0  1
 <span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>                 <span class="at">sizes =</span> subsets,</span>
 <span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>                 <span class="at">rfeControl =</span> ctrl)</span>
 <span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Print the selected features</span></span>
-<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">predictors</span>(results))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">predictors</span>(results))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "caa"      "thall"    "cp"       "oldpeak"  "sex"      "thalachh" "exng"    
 [8] "age"     </code></pre>
 </div>
 </div>
 <p>We utilize Recursive Feature Elimination with cross-validation to determine the most important subset of features from dataset2 that best predict the output variable (output). The printed output reveals the selected features deemed most significant by the RFE process for subsequent modeling.</p>
-<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-13_7f572aea2c9ff2cd58a06b601dabaf93">
+<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-13_62d272ce58b782d38f37e7a638bd3516">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">100</span>)</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>varimp_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">feature =</span> <span class="fu">row.names</span>(<span class="fu">varImp</span>(results))[<span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>],</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">importance =</span> <span class="fu">varImp</span>(results)[<span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>, <span class="dv">1</span>])</span>
@@ -402,7 +398,8 @@ Prediction  0  1
 </div>
 <p>The bar plot visually represents the importance of the top 9 features in descending order, where the length of each bar indicates the respective importance score. Higher bars denote features with greater importance in the predictive model. This helps understand the relative significance of different features in predicting the target variable.</p>
 <p><strong><em>Spliting the Data:</em></strong></p>
-<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-14_7993ea78682fdbb033b00ae5ed320799">
+<p>We split the data to training and testing part with a proportion of 7:3.</p>
+<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-14_e8b2c8cb0ba07c48742f775abe8e2289">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">100</span>)</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>data1 <span class="ot">&lt;-</span> dataset2 <span class="sc">%&gt;%</span></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">predictors</span>(results), <span class="st">"output"</span>)</span>
@@ -415,7 +412,7 @@ Prediction  0  1
 <span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>training[[<span class="st">"output"</span>]] <span class="ot">=</span> <span class="fu">factor</span>(training[[<span class="st">"output"</span>]])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><strong><em>Model Construction:</em></strong></p>
-<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-15_46b96a4c6bcd1774db49ead639c9db3d">
+<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-15_02971d84ea1399bd50cdea6eb6532add">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">100</span>)</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>trctrl <span class="ot">&lt;-</span> <span class="fu">trainControl</span>(<span class="at">method =</span> <span class="st">"repeatedcv"</span>, <span class="at">number =</span> <span class="dv">10</span>, <span class="at">repeats =</span> <span class="dv">3</span>)</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -437,8 +434,8 @@ Resampling: Cross-Validated (10 fold, repeated 3 times)
 Summary of sample sizes: 179, 181, 180, 180, 181, 180, ... 
 Resampling results:
 
-  Accuracy   Kappa    
-  0.8492356  0.6870332
+  Accuracy  Kappa
+  0.8492    0.687
 
 Tuning parameter 'C' was held constant at a value of 1</code></pre>
 </div>
@@ -446,7 +443,7 @@ Tuning parameter 'C' was held constant at a value of 1</code></pre>
 <p>Construct an SVM model with a linear kernel using repeated cross-validation (repeatedcv) for robust evaluation. It preprocesses the data by centering and scaling the predictor variables and evaluates the model’s performance based on the specified control parameters. The resulting svm_Linear object contains information about the trained SVM model, which can be further examined to assess model performance and obtain predictions on new data.</p>
 <p><strong>In this case, the model accuracy is 0.8492.</strong></p>
 <p><strong><em>Make prediction:</em></strong></p>
-<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-16_c1beaec79c260e96fcec1c14cdf9ef22">
+<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-16_9ea91cea6bf67a986372b033720de700">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">100</span>)</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>test_pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(svm_Linear, <span class="at">newdata =</span> testing)</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>test_pred</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -471,7 +468,7 @@ test_pred  0  1
 </div>
 <p>Apply the trained SVM model on the testing dataset and create a confusion matrix to evaluate the model’s predictive performance by comparing predicted values to actual values. The confusion matrix provides insights into the model’s accuracy, precision, recall, and other classification metrics.</p>
 <p><strong>Confusion Matrix Visualization</strong></p>
-<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-17_9451b67390d29b475a4f27206c842701">
+<div class="cell" data-hash="vignette_cache/html/unnamed-chunk-17_05cd5b9412caf4b33f059310fcde5c41">
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(plt, <span class="fu">aes</span>(Prediction,Var2, <span class="at">fill=</span> Freq)) <span class="sc">+</span></span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>        <span class="fu">geom_tile</span>() <span class="sc">+</span> <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label=</span>Freq)) <span class="sc">+</span></span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>        <span class="fu">scale_fill_gradient</span>(<span class="at">low=</span><span class="st">"white"</span>, <span class="at">high=</span><span class="st">"#009194"</span>) <span class="sc">+</span></span>
@@ -482,6 +479,7 @@ test_pred  0  1
 <p><img src="vignette_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>Finally, plot the confusion matrix to display the frequency of correct and incorrect predictions with gradient colors representing frequency levels.</p>
 </section>
 
 </main>
